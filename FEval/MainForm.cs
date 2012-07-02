@@ -5,13 +5,15 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-using Bocej.Info.Formulas;
+using PB.Formulas;
 using System.Drawing.Drawing2D;
 
-namespace Bocej.Info.FEval
+namespace PB.FEval
 {
     public partial class MainForm : Form
     {
+        private const string INDENT = "  ";
+
         public MainForm()
         {
             InitializeComponent();
@@ -166,8 +168,52 @@ namespace Bocej.Info.FEval
             g.DrawString(text, this.treeView1.Font, new SolidBrush(Color.Gray), 1, 1);
         }
 
+
+        private void btnExport_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        /// <summary>
+        /// vykresli vypoctovy strom
+        /// </summary>
+        /// <param name="parent">vlastnik alebo null pre root</param>
+        /// <param name="node">polozka na vykreslenie</param>
+        private void ExportTree(TreeNode parent, LeafNode node)
+        {
+            // kontrola na null
+            if (node != null)
+            {
+                // ak neexistuje vlastnik, vytvorim (je to root)
+                if (parent == null)
+                {
+                    parent = this.treeView1.Nodes.Add(node.Result.ToString());
+                    parent = this.treeView1.Nodes[0];
+                }
+
+                // vytvorenie treenode
+                TreeNode p = new TreeNode(node.ToString());
+                if (node.Type == NodeType.Operator) // operator vyfarbim a dam tooltip
+                {
+                    // farba
+                    p.ForeColor = Color.Green;
+                    // tooltip
+                    if (node.Right.Result < 0) // zaporne cislo vpravo dam do zatvoriek
+                        p.ToolTipText = string.Format(
+                            System.Globalization.CultureInfo.CurrentCulture,
+                            "{0}{1}({2})={3}",
+                            node.Left.Result, node.ToString(), node.Right.Result, node.Result);
+                    else
+                        p.ToolTipText = string.Format(
+                            System.Globalization.CultureInfo.CurrentCulture,
+                            "{0}{1}{2}={3}",
+                            node.Left.Result, node.ToString(), node.Right.Result, node.Result);
+                }
+                parent.Nodes.Add(p);
+                this.DrawTree(p, node.Left);  // lavy
+                this.DrawTree(p, node.Right); // pravy
+            }
+        }
         #endregion
-
-
     }
 }

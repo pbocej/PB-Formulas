@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Windows.Forms;
 
-namespace Bocej.Info.FEval
+namespace PB.FEval
 {
     static class Program
     {

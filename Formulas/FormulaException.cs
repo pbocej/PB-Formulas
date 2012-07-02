@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Bocej.Info.Formulas
+namespace PB.Formulas
 {
     /// <summary>
     /// chyba pri parsovani vzorca

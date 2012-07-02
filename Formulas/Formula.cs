@@ -3,7 +3,7 @@ using System.Text;
 using System.Collections;
 using System.Globalization;
 
-namespace Bocej.Info.Formulas
+namespace PB.Formulas
 {
     /// <summary>
     /// vzorec

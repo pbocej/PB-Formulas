@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Bocej.Info.Formulas
+namespace PB.Formulas
 {
     /// <summary>
     /// typ polozky vzorca

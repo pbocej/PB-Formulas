@@ -8,7 +8,7 @@
     <ProjectGuid>{5B9802ED-26C0-4A4E-B2FE-086895188D17}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Bocej.Info.Formulas</RootNamespace>
+    <RootNamespace>PB.Formulas</RootNamespace>
     <AssemblyName>Formulas</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -64,9 +64,6 @@
     <Compile Include="NodeType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="LeafNode.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
