@@ -7,7 +7,7 @@ namespace PB.Formulas
     /// <summary>
     /// chyba pri parsovani vzorca
     /// </summary>
-    public class FormulaException : ApplicationException
+    public class FormulaException : Exception
     {
         /// <summary>
         /// vytvori prazdnu chybu

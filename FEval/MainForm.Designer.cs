@@ -44,9 +44,10 @@
             this.label9 = new System.Windows.Forms.Label();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.tabPage2 = new System.Windows.Forms.TabPage();
             this.treeView1 = new System.Windows.Forms.TreeView();
-            this.txtTree = new System.Windows.Forms.TextBox();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.btnSaveXml = new System.Windows.Forms.Button();
+            this.wbXml = new System.Windows.Forms.WebBrowser();
             this.toolStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -204,6 +205,7 @@
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(401, 311);
             this.tabControl1.TabIndex = 18;
+            this.tabControl1.Selecting += new System.Windows.Forms.TabControlCancelEventHandler(this.tabControl1_Selecting);
             // 
             // tabPage1
             // 
@@ -215,17 +217,6 @@
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Tree";
             this.tabPage1.UseVisualStyleBackColor = true;
-            // 
-            // tabPage2
-            // 
-            this.tabPage2.Controls.Add(this.txtTree);
-            this.tabPage2.Location = new System.Drawing.Point(4, 22);
-            this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(393, 285);
-            this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "Text";
-            this.tabPage2.UseVisualStyleBackColor = true;
             // 
             // treeView1
             // 
@@ -239,15 +230,41 @@
             this.treeView1.Size = new System.Drawing.Size(387, 279);
             this.treeView1.TabIndex = 8;
             // 
-            // txtTree
+            // tabPage2
             // 
-            this.txtTree.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtTree.Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.txtTree.Location = new System.Drawing.Point(3, 3);
-            this.txtTree.Multiline = true;
-            this.txtTree.Name = "txtTree";
-            this.txtTree.Size = new System.Drawing.Size(387, 279);
-            this.txtTree.TabIndex = 0;
+            this.tabPage2.Controls.Add(this.btnSaveXml);
+            this.tabPage2.Controls.Add(this.wbXml);
+            this.tabPage2.Location = new System.Drawing.Point(4, 22);
+            this.tabPage2.Name = "tabPage2";
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage2.Size = new System.Drawing.Size(393, 285);
+            this.tabPage2.TabIndex = 1;
+            this.tabPage2.Text = "Xml";
+            this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // btnSaveXml
+            // 
+            this.btnSaveXml.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnSaveXml.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnSaveXml.Image = global::PB.FEval.Properties.Resources.save;
+            this.btnSaveXml.Location = new System.Drawing.Point(352, 3);
+            this.btnSaveXml.Name = "btnSaveXml";
+            this.btnSaveXml.Size = new System.Drawing.Size(20, 20);
+            this.btnSaveXml.TabIndex = 1;
+            this.btnSaveXml.TabStop = false;
+            this.btnSaveXml.UseVisualStyleBackColor = true;
+            this.btnSaveXml.Visible = false;
+            this.btnSaveXml.Click += new System.EventHandler(this.btnSaveXml_Click);
+            // 
+            // wbXml
+            // 
+            this.wbXml.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.wbXml.Location = new System.Drawing.Point(3, 3);
+            this.wbXml.MinimumSize = new System.Drawing.Size(20, 20);
+            this.wbXml.Name = "wbXml";
+            this.wbXml.Size = new System.Drawing.Size(387, 279);
+            this.wbXml.TabIndex = 0;
+            this.wbXml.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.wbXml_DocumentCompleted);
             // 
             // MainForm
             // 
@@ -275,7 +292,6 @@
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             this.tabPage2.ResumeLayout(false);
-            this.tabPage2.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -300,7 +316,8 @@
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.TreeView treeView1;
         private System.Windows.Forms.TabPage tabPage2;
-        private System.Windows.Forms.TextBox txtTree;
+        private System.Windows.Forms.WebBrowser wbXml;
+        private System.Windows.Forms.Button btnSaveXml;
     }
 }
 

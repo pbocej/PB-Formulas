@@ -2,6 +2,8 @@
 using System.Text;
 using System.Collections;
 using System.Globalization;
+using System.Xml;
+using System.IO;
 
 namespace PB.Formulas
 {
@@ -22,6 +24,7 @@ namespace PB.Formulas
         public Formula(string formula)
         {
             this.Evaluate(formula);
+            this.Expression = formula;
         }
 
         #endregion
@@ -328,6 +331,11 @@ namespace PB.Formulas
         public LeafNode EvaluationTreeRoot { get; private set; }
 
         /// <summary>
+        /// Gets the expression.
+        /// </summary>
+        public string Expression { get; private set; }
+
+        /// <summary>
         /// vysledok
         /// </summary>
         public double Result
@@ -341,6 +349,91 @@ namespace PB.Formulas
             }
         }
 
+        #endregion
+
+        #region Xml
+        /// <summary>
+        /// To the XML stream.
+        /// </summary>
+        /// <returns>xml stream</returns>
+        public Stream ToXmlStream()
+        {
+            try
+            {
+                var doc = this.ToXmlDocument();
+                var buffer = Encoding.UTF8.GetBytes(doc.ToString());
+                var mem = new MemoryStream(buffer);
+                mem.Position = 0;
+                return mem;
+            }
+            catch (FormulaException) { throw; }
+            catch (SystemException e)
+            {
+                throw new FormatException("Error creating xml stream.", e);
+            }
+        }
+        /// <summary>
+        /// To the XML.
+        /// </summary>
+        /// <returns>xml document tree</returns>
+        public XmlDocument ToXmlDocument()
+        {
+            if (this.EvaluationTreeRoot == null)
+                throw new FormulaException("Nothing was evauated yet.");
+            try
+            {
+                var doc = new XmlDocument();
+                //doc.AppendChild(doc.CreateProcessingInstruction("xml", "version=\"1.0\" encoding=\"utf-8\""));
+                var el = doc.CreateElement("formula");
+                var attr = doc.CreateAttribute("expression");
+                attr.Value = this.Expression;
+                el.Attributes.Append(attr);
+                attr = doc.CreateAttribute("result");
+                attr.Value = this.Result.ToString();
+                el.Attributes.Append(attr);
+                doc.AppendChild(el);
+                this.MakeXmlTree(doc.DocumentElement, this.EvaluationTreeRoot);
+                return doc;
+            }
+            catch (SystemException e)
+            {
+                throw new FormatException("Error creating xml tree.", e);
+            }
+        }
+
+        private void MakeXmlTree(XmlElement parent, LeafNode node)
+        {
+            // kontrola na null
+            if (node != null)
+            {
+                // vytvorenie treenode
+                XmlElement el = parent.OwnerDocument.CreateElement(node.Type.ToString());
+                XmlAttribute attr = parent.OwnerDocument.CreateAttribute("data");
+                attr.Value=node.ToString();
+                el.Attributes.Append(attr);
+                if (node.Type == NodeType.Operator) // operator vyfarbim a dam tooltip
+                {
+                    XmlAttribute a = el.Attributes.Append(parent.OwnerDocument.CreateAttribute("expression"));
+                    if (node.Right.Result < 0) // zaporne cislo vpravo dam do zatvoriek
+                        a.Value = string.Format(
+                            System.Globalization.CultureInfo.CurrentCulture,
+                            "{0}{1}({2})",
+                            node.Left.Result, node.ToString(), node.Right.Result);
+                    else
+                        a.Value = string.Format(
+                            System.Globalization.CultureInfo.CurrentCulture,
+                            "{0}{1}{2}",
+                            node.Left.Result, node.ToString(), node.Right.Result);
+                    el.Attributes.Append(a);
+                    a = el.Attributes.Append(parent.OwnerDocument.CreateAttribute("result"));
+                    a.Value = node.Result.ToString();
+                    el.Attributes.Append(a);
+                }
+                parent.AppendChild(el);
+                this.MakeXmlTree(el, node.Left);  // lavy
+                this.MakeXmlTree(el, node.Right); // pravy
+            }
+        }
         #endregion
     }
 }
