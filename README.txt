@@ -16,4 +16,4 @@ Sample expression:
 
 Projects:
 Formulas	- formula processing library
-FEval		- windows forms application for evaluating formulas and displaying expression trees that using librar
+FEval		- windows forms application for evaluating formulas and displaying expression trees that using library
