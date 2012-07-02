@@ -3,7 +3,7 @@
 namespace PB.Formulas
 {
     /// <summary>
-    /// typ polozky vzorca
+    /// Type of the expression node
     /// </summary>
     [Flags]
     public enum NodeType : int

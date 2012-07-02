@@ -3,23 +3,22 @@
 namespace PB.Formulas
 {
     /// <summary>
-    /// polozka vzorca
+    /// Expression node
     /// </summary>
     public class Node
     {
-        // znamienka
         private static char[] signs = new char[] { '+', '-' };
 
         /// <summary>
-        /// inicializuje polozku podla hodnoty a typu
+        /// Initializes a new instance of the <see cref="Node" /> class.
         /// </summary>
-        /// <param name="value">operator or bracket</param>
-        /// <param name="type">node type</param>
+        /// <param name="value">The value.</param>
+        /// <param name="type">The node type.</param>
         public Node(object value, NodeType type)
         {
             this.Value = value;
             this.Type = type;
-            // podla typu nastavim prioritu
+            // setup priority by type
             switch (type)
             {
                 case NodeType.Operator:         // +,-,*,/
@@ -41,30 +40,32 @@ namespace PB.Formulas
         }
 
         /// <summary>
-        /// inicializuje polozku cislom
+        /// Initializes a new instance of the <see cref="Node" /> class with number.
         /// </summary>
-        /// <param name="value">number</param>
+        /// <param name="value">The number.</param>
         public Node(double value) : this(value, NodeType.Operand) { }
 
         /// <summary>
-        /// typ polozky
+        /// Gets the type.
         /// </summary>
         public NodeType Type { get; private set; }
 
         /// <summary>
-        /// hodnota polozky
+        /// Gets the value.
         /// </summary>
         public object Value { get; private set; }
 
         /// <summary>
-        /// priorita
+        /// Gets the priority.
         /// </summary>
         public byte Priority { get; private set; }
 
         /// <summary>
-        /// vrati string z Value
+        /// Returns a <see cref="System.String" /> that represents this instance.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>
+        /// A <see cref="System.String" /> that represents this instance.
+        /// </returns>
         public override string ToString()
         {
             return this.Value.ToString();

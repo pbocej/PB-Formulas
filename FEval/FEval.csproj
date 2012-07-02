@@ -12,7 +12,7 @@
     <AssemblyName>FEval</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <ApplicationIcon>001_01.ico</ApplicationIcon>
+    <ApplicationIcon>Resources\001_01.ico</ApplicationIcon>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>3.5</OldToolsVersion>
@@ -100,7 +100,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="001_01.ico" />
+    <Content Include="Resources\001_01.ico" />
     <Content Include="Resources\save.png" />
     <None Include="Resources\001_60.png" />
     <None Include="Resources\001_06.png" />

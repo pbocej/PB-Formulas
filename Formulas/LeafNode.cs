@@ -5,28 +5,23 @@ using System.Text;
 namespace PB.Formulas
 {
     /// <summary>
-    /// list vypoctoveho stromu
+    /// Expression tree node
     /// </summary>
     public class LeafNode
     {
         #region Initializers
-
-        /// <summary>
-        /// vytvori instanciu
-        /// </summary>
-        public LeafNode() { }
 
         #endregion
 
         #region Properties
 
         /// <summary>
-        /// lava strana
+        /// Gets or sets the left side.
         /// </summary>
         public LeafNode Left { get; set; }
 
         /// <summary>
-        /// prava strana
+        /// Gets or sets the right side.
         /// </summary>
         public LeafNode Right { get; set; }
 
@@ -35,26 +30,22 @@ namespace PB.Formulas
         /// </summary>
         public object Data { get; set; }
 
-        private double result = double.NaN; // cache vysledku
-        private bool resultComputed = false; // indikacia cache vysledku
+        private double result = double.NaN; // result cache
         /// <summary>
-        /// vysledok
+        /// Expression result
         /// </summary>
         public double Result 
         { 
             get 
             {
-                if (!this.resultComputed)
-                {
+                if (double.IsNaN(this.result))
                     this.result = this.EvaluateNode();
-                    this.resultComputed = true;
-                }
                 return this.result;
             }
         }
 
         /// <summary>
-        /// typ listu; len Operator alebo Operand
+        /// Node type (only operator or operand)
         /// </summary>
         public NodeType Type
         {
@@ -72,9 +63,11 @@ namespace PB.Formulas
         #region Overrides
 
         /// <summary>
-        /// vrati data
+        /// Returns a <see cref="System.String" /> that represents this instance.
         /// </summary>
-        /// <returns>data string</returns>
+        /// <returns>
+        /// A <see cref="System.String" /> that represents this instance.
+        /// </returns>
         public override string ToString()
         {
             return this.Data.ToString();
@@ -85,9 +78,11 @@ namespace PB.Formulas
         #region Evaluation
 
         /// <summary>
-        /// vypocita vysledok listu
+        /// Evaluates the node.
         /// </summary>
-        /// <returns>vysledok</returns>
+        /// <returns>double</returns>
+        /// <exception cref="System.DivideByZeroException">When divide by zero detected</exception>
+        /// <exception cref="System.FormatException">Wraps other errors, see InnerException</exception>
         internal double EvaluateNode()
         {
             if (this.Data is double) // cislo

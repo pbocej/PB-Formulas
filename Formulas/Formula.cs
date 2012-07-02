@@ -8,19 +8,18 @@ using System.IO;
 namespace PB.Formulas
 {
     /// <summary>
-    /// vzorec
+    /// Formula engine
     /// </summary>
     public class Formula
     {
-
         private readonly string[] signs = { "-", "+" };
 
         #region Initializers & Creators
 
         /// <summary>
-        /// vytvori objekt vzorca a vypocita ho
+        /// Initializes a new instance of the <see cref="Formula" /> class.
         /// </summary>
-        /// <param name="formula">formula</param>
+        /// <param name="formula">The expression string.</param>
         public Formula(string formula)
         {
             this.Evaluate(formula);
@@ -32,22 +31,23 @@ namespace PB.Formulas
         #region Evaluation
 
         /// <summary>
-        /// vypocet
+        /// Evaluates the specified formula.
         /// </summary>
-        /// <param name="formula">vstupny vzorec</param>
+        /// <param name="formula">The formula.</param>
+        /// <exception cref="System.ArgumentNullException">When formula is empty</exception>
         private void Evaluate(string formula)
         {
-            // prazdny vzorec
+            // empty formula
             if (formula == null || string.IsNullOrEmpty(formula.Trim()))
                 throw new ArgumentNullException();
 
-            // rozlozenie na jednotlive elementy, infix notacia
+            // extract to elements - infix notation
             this.Infix = this.ToInfix(formula);
 
-            // usporiadanie podla postfix notacie
+            // change to postfix layout
             this.Postfix = this.ToPostfix(this.Infix);
 
-            // vypoctovy strom
+            // evaluation tree
             this.EvaluationTreeRoot = this.ToEvaluationTree(this.Postfix);
 
         }
@@ -55,36 +55,36 @@ namespace PB.Formulas
         #region Infix
 
         /// <summary>
-        /// rozlozenie na jednotlive elementy, infix notacia
+        /// extract to elements - infix notation
         /// </summary>
-        /// <param name="formula">vzorec</param>
-        /// <returns>pole prvkov</returns>
+        /// <param name="formula">expression</param>
+        /// <returns>array of nodes</returns>
         private Node[] ToInfix(string formula)
         {
-            // oddelovace tisicov a des. miest
+            // thousents and decimal separators
             char[] otherNumerisc = new char[] { 
                 CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator[0], 
                 CultureInfo.CurrentCulture.NumberFormat.NumberGroupSeparator[0],
                 '+', '-' };
-            // vystupne pole
+            // output array
             ArrayList nodes = new ArrayList();
-            // otvorene zatvorky
+            // number of open brackets
             int openBrackets = 0;
-            // nasledujuci povoleny element
+            // next allowed element
             NodeType nextAllowed = NodeType.Sign | NodeType.Operand | NodeType.OpeningBracket;
-            // type elementu
+            // type of element
             NodeType nodeType = NodeType.None;
-            // zaciatok elementu v stringu vzorca
+            // start position of element in formula
             int opStart = 0;
-            // cyklus po znakoch vo vzorci
+
             for (int i = 0; i < formula.Length; i++)
             {
                 char c = formula[i];
-                // prazdne miesto
+                // empty
                 if (char.IsWhiteSpace(c))
                     continue;
 
-                // zapisem zaciatok elementu
+                // save start position
                 opStart = i;
 
                 switch (c)
@@ -105,7 +105,7 @@ namespace PB.Formulas
                         break;
                     case '+':
                     case '-':
-                        // ak som na zaciatku vzorca, alebo zatvoriek, alebo bolo predchadzajuce tiez +-, znamienko tvori operator
+                        // begin of subexpression, bracket or +- sign: operator
                         if (nodeType == NodeType.None ||
                             nodeType == NodeType.OpeningBracket ||
                             (nodes.Count > 0 && Array.IndexOf(this.signs, ((Node)nodes[nodes.Count - 1]).Value.ToString()) >= 0))
@@ -128,7 +128,7 @@ namespace PB.Formulas
                         nodeType = NodeType.Operand;
                     if ((nextAllowed & nodeType) == 0)
                         throw new FormulaException("Invalid character.", formula, i, 1);
-                    // nacitam cely operator
+                    // load whole operand
                     StringBuilder operand = new StringBuilder();
                     do
                     {
@@ -139,9 +139,9 @@ namespace PB.Formulas
                             break;
                         c = formula[i];
                     } while (i < formula.Length && (char.IsDigit(c) || Array.BinarySearch(otherNumerisc, c) >= 0 || char.IsWhiteSpace(c)));
-                    // vratim i na predoslu hodnotu
+                    // previous position
                     i--;
-                    // zmenim text na cislo a ulozim
+                    // text to number, initialize node
                     double val = 0;
                     if (double.TryParse(operand.ToString(), out val))
                         nodes.Add(new Node(val));
@@ -150,24 +150,24 @@ namespace PB.Formulas
                     nextAllowed = NodeType.Operator | NodeType.Sign | NodeType.ClosingBracket;
                     break;
                 }
-                // zmenim typ znamienko na operator
+                // sign to operator
                 if (nodeType == NodeType.Sign)
                     nodeType = NodeType.Operator;
-                // pridam operator a zatvorku (operand sa zapisal vo svojej sekcii switch)
+                // add operator and bracket (operand was detected in switch section)
                 if (nodeType != NodeType.Operand)
                     nodes.Add(new Node(c, nodeType));
             }
 
-            // kontrola zatvorenia zatvoriek
+            // chechk close all brackets
             if (openBrackets != 0)
                 throw new FormulaException("Brackets are not closed.");
 
-            // kontrola posledneho prvku, musi to byt ) alebo operand
+            // check last node, must be closing bracket or operand
             Node last = (Node)nodes[nodes.Count - 1];
             if (!(last.Type == NodeType.ClosingBracket || last.Type == NodeType.Operand))
                 throw new FormulaException("Invalid characters.", formula, opStart, formula.Length - opStart);
 
-            // vratim pole
+            // return array
             return (Node[])nodes.ToArray(typeof(Node));
         }
 
@@ -178,24 +178,24 @@ namespace PB.Formulas
         #region Postfix
 
         /// <summary>
-        /// usporiadanie podla postfix notacie
+        /// change to postfix layout
         /// </summary>
-        /// <param name="infixNodes">infix pole</param>
-        /// <returns>postfix pole</returns>
+        /// <param name="infixNodes">infix array</param>
+        /// <returns>postfix array</returns>
         private Node[] ToPostfix(Node[] infixNodes)
         {
-            // pomocna halda
+            // temporary stack
             Stack stack = new Stack();
-            // vystupne pole
+            // output array
             ArrayList output = new ArrayList();
             foreach (Node node in infixNodes)
             {
                 switch (node.Type)
                 {
-                    case NodeType.Operand: // pridam ihned
+                    case NodeType.Operand: // add now
                         output.Add(node);
                         break;
-                    case NodeType.OpeningBracket: // vlozim posledny z haldy
+                    case NodeType.OpeningBracket: // add last from stack
                         stack.Push(node);
                         break;
                     case NodeType.Operator:
@@ -206,42 +206,42 @@ namespace PB.Formulas
                         break;
                 }
             }
-            // zbytok haldy do vystupu
+            // flush stack to output
             this.StackToOutput(stack, output, false);
 
             return (Node[])output.ToArray(typeof(Node));
         }
 
         /// <summary>
-        /// spracovanie operatora podla typu a priority
+        /// process operator by type and priority
         /// </summary>
         /// <param name="node">operator</param>
-        /// <param name="stack">halda</param>
-        /// <param name="output">vystup</param>
+        /// <param name="stack">stack of nodes</param>
+        /// <param name="output">output arraylist</param>
         private void ProcessOperator(Node node, Stack stack, ArrayList output)
         {
-            if (stack.Count == 0) // prazdna halda
+            if (stack.Count == 0) // empty stack
             {
-                // vlozim operator do haldy
+                // operator to stack
                 stack.Push(node);
             }
             else
             {
-                if (((Node)stack.Peek()).Type == NodeType.OpeningBracket) // na vrchu haldy je otvorena zatvorka
+                if (((Node)stack.Peek()).Type == NodeType.OpeningBracket) // there is opening bracked on top of stack
                 {
-                    // vlozim operator do haldy
+                    // operator to stack
                     stack.Push(node);
                 }
                 else
                 {
-                    if (node.Priority > ((Node)stack.Peek()).Priority) // operator ma vacsiu prioritu ako posledny v halde
-                        // vlozim operator do haldy
+                    if (node.Priority > ((Node)stack.Peek()).Priority) // operator has higher priority then last in stack
+                        // operator to stack
                         stack.Push(node);
-                    else  // operator ma mensiu prioritu ako posledny v halde
+                    else  // operator has lower priority then last in stack
                     {
-                        // vlozim posledny z haldy do vystupu
+                        // last from stack to output
                         output.Add(stack.Pop());
-                        // opakujem proceduru
+                        // recursive repeat
                         this.ProcessOperator(node, stack, output);
                     }
                 }
@@ -249,10 +249,10 @@ namespace PB.Formulas
         }
 
         /// <summary>
-        /// vysype haldu do vystupu
+        /// pushs stack to output
         /// </summary>
-        /// <param name="stack">halda</param>
-        /// <param name="output">vystup</param>
+        /// <param name="stack">stack</param>
+        /// <param name="output">output array</param>
         private void StackToOutput(Stack stack, ArrayList output, bool onlyToBracket)
         {
             while (stack.Count > 0)
@@ -275,25 +275,24 @@ namespace PB.Formulas
         #region Evaluation tree
 
         /// <summary>
-        /// vytvori vypoctovy strom z postfix pola
+        /// reates evaluation tree from postfix
         /// </summary>
-        /// <param name="postfixNodes">postfix pole</param>
-        /// <returns>kmen stromu</returns>
+        /// <param name="postfixNodes">postfix array</param>
+        /// <returns>tree root node</returns>
         private LeafNode ToEvaluationTree(Node[] postfixNodes)
         {
-            // halda
             Stack stack = new Stack();
             foreach (Node node in postfixNodes)
             {
                 LeafNode ln;
                 switch (node.Type)
                 {
-                    case NodeType.Operand: // operand len vlozim do haldy
+                    case NodeType.Operand: // operand - only push to stack
                         ln = new LeafNode();
                         ln.Data = node.Value;
                         stack.Push(ln);
                         break;
-                    case NodeType.Operator: // operator: nastavim lavu a pravu stranu a vlozim do haldy
+                    case NodeType.Operator: // operator: setup left and right side and push to stack
                         ln = new LeafNode();
                         ln.Data = node.Value;
                         ln.Right = (LeafNode)stack.Pop();
@@ -316,17 +315,17 @@ namespace PB.Formulas
         #region Properties
 
         /// <summary>
-        /// infix notacia
+        /// infix notation
         /// </summary>
         public Node[] Infix { get; private set; }
 
         /// <summary>
-        /// postfix notacia
+        /// postfix notation
         /// </summary>
         public Node[] Postfix { get; private set; }
 
         /// <summary>
-        /// kmen vypoctoveho stromu
+        /// evaluation tree root node
         /// </summary>
         public LeafNode EvaluationTreeRoot { get; private set; }
 
@@ -336,7 +335,7 @@ namespace PB.Formulas
         public string Expression { get; private set; }
 
         /// <summary>
-        /// vysledok
+        /// formula result
         /// </summary>
         public double Result
         {
@@ -373,7 +372,7 @@ namespace PB.Formulas
             }
         }
         /// <summary>
-        /// To the XML.
+        /// To the XML document.
         /// </summary>
         /// <returns>xml document tree</returns>
         public XmlDocument ToXmlDocument()
@@ -383,7 +382,6 @@ namespace PB.Formulas
             try
             {
                 var doc = new XmlDocument();
-                //doc.AppendChild(doc.CreateProcessingInstruction("xml", "version=\"1.0\" encoding=\"utf-8\""));
                 var el = doc.CreateElement("formula");
                 var attr = doc.CreateAttribute("expression");
                 attr.Value = this.Expression;
@@ -403,18 +401,17 @@ namespace PB.Formulas
 
         private void MakeXmlTree(XmlElement parent, LeafNode node)
         {
-            // kontrola na null
             if (node != null)
             {
-                // vytvorenie treenode
+                // creating element
                 XmlElement el = parent.OwnerDocument.CreateElement(node.Type.ToString());
                 XmlAttribute attr = parent.OwnerDocument.CreateAttribute("data");
                 attr.Value=node.ToString();
                 el.Attributes.Append(attr);
-                if (node.Type == NodeType.Operator) // operator vyfarbim a dam tooltip
+                if (node.Type == NodeType.Operator) // operator - expression and result attributes
                 {
                     XmlAttribute a = el.Attributes.Append(parent.OwnerDocument.CreateAttribute("expression"));
-                    if (node.Right.Result < 0) // zaporne cislo vpravo dam do zatvoriek
+                    if (node.Right.Result < 0) // negative number to bracket
                         a.Value = string.Format(
                             System.Globalization.CultureInfo.CurrentCulture,
                             "{0}{1}({2})",
@@ -430,8 +427,8 @@ namespace PB.Formulas
                     el.Attributes.Append(a);
                 }
                 parent.AppendChild(el);
-                this.MakeXmlTree(el, node.Left);  // lavy
-                this.MakeXmlTree(el, node.Right); // pravy
+                this.MakeXmlTree(el, node.Left);  // left
+                this.MakeXmlTree(el, node.Right); // right
             }
         }
         #endregion
