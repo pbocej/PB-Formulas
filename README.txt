@@ -13,3 +13,7 @@ Enabled input is:
 Input expression has unlimited length.
 Sample expression:
 	-8*((5+6)/2)+44
+
+Projects:
+Formulas	- formula processing library
+FEval		- windows forms application for evaluating formulas and displaying expression trees that using librar
